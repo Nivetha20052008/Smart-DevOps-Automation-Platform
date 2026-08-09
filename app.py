@@ -88,6 +88,11 @@ page = st.sidebar.radio(
 
 st.sidebar.divider()
 
+
+# -------------------------------------------------
+# LOGOUT
+# -------------------------------------------------
+
 if st.sidebar.button(
     "Logout",
     use_container_width=True
@@ -120,91 +125,107 @@ if page == "Dashboard":
 
 
     # -------------------------------------------------
-    # LIVE DEVICE MONITORING
+    # CONNECTED DEVICE MONITORING
     # -------------------------------------------------
 
-    st.subheader("🖥️ Device Monitoring")
-
-    DEVICE_NAME = "LAPTOP-SFM5Q1KM"
+    st.subheader("🖥️ Connected Devices")
 
     MONITOR_API = (
-        "https://smart-devops-api.onrender.com/"
-        f"api/monitor/{DEVICE_NAME}"
+        "https://smart-devops-api.onrender.com/api/monitor"
     )
 
     try:
 
         response = requests.get(
             MONITOR_API,
-            timeout=5
+            timeout=10
         )
 
         if response.status_code == 200:
 
-            device = response.json()
+            result = response.json()
 
-            col1, col2, col3, col4 = st.columns(4)
+            devices = result.get(
+                "devices",
+                []
+            )
 
-            with col1:
+            if devices:
 
-                st.metric(
-                    "Device",
-                    device["device_name"]
-                )
+                for device in devices:
 
-            with col2:
+                    st.markdown(
+                        f"### 💻 {device['device_name']}"
+                    )
 
-                st.metric(
-                    "CPU Usage",
-                    f"{device['cpu']}%"
-                )
+                    col1, col2, col3, col4 = st.columns(4)
 
-            with col3:
+                    with col1:
 
-                st.metric(
-                    "Memory Usage",
-                    f"{device['memory']}%"
-                )
+                        st.metric(
+                            "CPU Usage",
+                            f"{device['cpu']}%"
+                        )
 
-            with col4:
+                    with col2:
 
-                st.metric(
-                    "Disk Usage",
-                    f"{device['disk']}%"
-                )
+                        st.metric(
+                            "Memory Usage",
+                            f"{device['memory']}%"
+                        )
+
+                    with col3:
+
+                        st.metric(
+                            "Disk Usage",
+                            f"{device['disk']}%"
+                        )
+
+                    with col4:
+
+                        st.metric(
+                            "Status",
+                            device["status"]
+                        )
 
 
-            if device["status"] == "HEALTHY":
+                    if device["status"] == "HEALTHY":
 
-                st.success(
-                    "🟢 Device is healthy."
-                )
+                        st.success(
+                            "🟢 Device is healthy."
+                        )
 
-            elif device["status"] == "WARNING":
+                    elif device["status"] == "WARNING":
 
-                st.warning(
-                    "🟡 Device resource usage is high."
-                )
+                        st.warning(
+                            "🟡 Device resource usage is high."
+                        )
+
+                    else:
+
+                        st.error(
+                            "🔴 Critical resource usage detected."
+                        )
+
+
+                    st.caption(
+                        f"Last updated: "
+                        f"{device['updated_at']}"
+                    )
+
+                    st.divider()
 
             else:
 
-                st.error(
-                    "🔴 Critical resource usage detected."
+                st.info(
+                    "No devices are currently connected."
                 )
-
-
-            st.caption(
-                f"Last updated: {device['updated_at']}"
-            )
 
         else:
 
-            st.warning(
-                "Device is not connected to the monitoring server."
-            )
-
-            st.caption(
-                f"API Response: {response.status_code}"
+            st.error(
+                f"Monitoring API error: "
+                f"{response.status_code}"
             )
 
     except requests.RequestException:
@@ -212,9 +233,6 @@ if page == "Dashboard":
         st.warning(
             "Monitoring server is currently unavailable."
         )
-
-
-    st.divider()
 
 
     # -------------------------------------------------
@@ -253,12 +271,14 @@ if page == "Dashboard":
                 "Immediate attention"
             )
 
+
     with col2:
 
         st.metric(
             "CPU Usage",
             f"{health['cpu']}%"
         )
+
 
     with col3:
 
@@ -267,12 +287,14 @@ if page == "Dashboard":
             f"{health['memory']}%"
         )
 
+
     with col4:
 
         st.metric(
             "Disk Usage",
             f"{health['disk']}%"
         )
+
 
     st.caption(
         f"Last checked: {health['checked_at']}"
@@ -428,6 +450,7 @@ elif page == "Log Analyzer":
         height=250
     )
 
+
     if st.button(
         "Analyze Log",
         use_container_width=True
@@ -514,7 +537,9 @@ elif page == "Log Analyzer":
 
         if result["errors"]:
 
-            st.subheader("Detected Errors")
+            st.subheader(
+                "Detected Errors"
+            )
 
             for error in result["errors"]:
 
@@ -523,7 +548,9 @@ elif page == "Log Analyzer":
 
         if result["warnings"]:
 
-            st.subheader("Detected Warnings")
+            st.subheader(
+                "Detected Warnings"
+            )
 
             for warning in result["warnings"]:
 
@@ -584,7 +611,9 @@ elif page == "CI/CD Monitor":
 
     st.divider()
 
-    st.subheader("Latest Pipeline")
+    st.subheader(
+        "Latest Pipeline"
+    )
 
     st.success(
         "Build #001 completed successfully."
@@ -605,7 +634,9 @@ elif page == "CI/CD Monitor":
 
 elif page == "Health Check":
 
-    st.header("System Health Check")
+    st.header(
+        "System Health Check"
+    )
 
     health = get_system_health()
 
@@ -672,7 +703,9 @@ elif page == "Health Check":
 
 elif page == "Recovery":
 
-    st.header("Recovery Center")
+    st.header(
+        "Recovery Center"
+    )
 
     st.write(
         "Perform controlled recovery actions."
@@ -717,7 +750,9 @@ elif page == "Recovery":
 
 elif page == "Deployment History":
 
-    st.header("Deployment History")
+    st.header(
+        "Deployment History"
+    )
 
     project_name = st.text_input(
         "Project Name",

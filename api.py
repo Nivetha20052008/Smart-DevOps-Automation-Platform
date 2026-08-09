@@ -3,8 +3,13 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+# Store latest monitoring data for each device
 latest_data = {}
 
+
+# -------------------------------------------------
+# RECEIVE MONITORING DATA
+# -------------------------------------------------
 
 @app.route("/api/monitor", methods=["POST"])
 def receive_monitor_data():
@@ -18,6 +23,12 @@ def receive_monitor_data():
         }), 400
 
     device_name = data.get("device_name")
+
+    if not device_name:
+        return jsonify({
+            "status": "error",
+            "message": "Device name is required"
+        }), 400
 
     latest_data[device_name] = {
         "device_name": device_name,
@@ -33,20 +44,44 @@ def receive_monitor_data():
     return jsonify({
         "status": "success",
         "message": "Monitoring data received"
-    })
+    }), 200
 
+
+# -------------------------------------------------
+# GET ALL CONNECTED DEVICES
+# -------------------------------------------------
+
+@app.route("/api/monitor", methods=["GET"])
+def get_all_monitor_data():
+
+    return jsonify({
+        "status": "success",
+        "devices": list(latest_data.values())
+    }), 200
+
+
+# -------------------------------------------------
+# GET SPECIFIC DEVICE
+# -------------------------------------------------
 
 @app.route("/api/monitor/<device_name>", methods=["GET"])
 def get_monitor_data(device_name):
 
     if device_name not in latest_data:
+
         return jsonify({
             "status": "error",
             "message": "Device not found"
         }), 404
 
-    return jsonify(latest_data[device_name])
+    return jsonify(
+        latest_data[device_name]
+    ), 200
 
+
+# -------------------------------------------------
+# API HOME
+# -------------------------------------------------
 
 @app.route("/")
 def home():
@@ -57,7 +92,12 @@ def home():
     })
 
 
+# -------------------------------------------------
+# RUN SERVER
+# -------------------------------------------------
+
 if __name__ == "__main__":
+
     app.run(
         host="0.0.0.0",
         port=5000,
