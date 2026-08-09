@@ -582,51 +582,232 @@ elif page == "CI/CD Monitor":
     st.header("CI/CD Monitor")
 
     st.write(
-        "Monitor the current application build status."
+        "Monitor the latest GitHub Actions workflow status."
     )
 
-    col1, col2, col3 = st.columns(3)
+    GITHUB_API_URL = (
+        "https://api.github.com/repos/"
+        "Nivetha20052008/"
+        "Smart-DevOps-Automation-Platform/"
+        "actions/runs"
+    )
 
-    with col1:
+    try:
 
-        st.metric(
-            "Build",
-            "SUCCESS"
+        response = requests.get(
+            GITHUB_API_URL,
+            headers={
+                "Accept": "application/vnd.github+json"
+            },
+            timeout=10
         )
 
-    with col2:
+        if response.status_code == 200:
 
-        st.metric(
-            "Branch",
-            "main"
+            data = response.json()
+
+            workflow_runs = data.get(
+                "workflow_runs",
+                []
+            )
+
+            if workflow_runs:
+
+                latest_run = workflow_runs[0]
+
+                status = latest_run.get(
+                    "status",
+                    "unknown"
+                )
+
+                conclusion = latest_run.get(
+                    "conclusion"
+                )
+
+                branch = latest_run.get(
+                    "head_branch",
+                    "unknown"
+                )
+
+                run_number = latest_run.get(
+                    "run_number",
+                    "unknown"
+                )
+
+                workflow_name = latest_run.get(
+                    "name",
+                    "GitHub Actions"
+                )
+
+                created_at = latest_run.get(
+                    "created_at",
+                    "unknown"
+                )
+
+                updated_at = latest_run.get(
+                    "updated_at",
+                    "unknown"
+                )
+
+
+                # ---------------------------------
+                # BUILD STATUS
+                # ---------------------------------
+
+                if status == "completed":
+
+                    if conclusion == "success":
+
+                        build_status = "SUCCESS"
+
+                    elif conclusion == "failure":
+
+                        build_status = "FAILED"
+
+                    else:
+
+                        build_status = (
+                            conclusion.upper()
+                            if conclusion
+                            else "UNKNOWN"
+                        )
+
+                else:
+
+                    build_status = (
+                        status.upper()
+                    )
+
+
+                # ---------------------------------
+                # STATUS CARDS
+                # ---------------------------------
+
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+
+                    st.metric(
+                        "Build",
+                        build_status
+                    )
+
+                with col2:
+
+                    st.metric(
+                        "Branch",
+                        branch
+                    )
+
+                with col3:
+
+                    st.metric(
+                        "Pipeline",
+                        status.upper()
+                    )
+
+
+                st.divider()
+
+
+                # ---------------------------------
+                # LATEST WORKFLOW
+                # ---------------------------------
+
+                st.subheader(
+                    "Latest Pipeline"
+                )
+
+                st.write(
+                    f"**Workflow:** {workflow_name}"
+                )
+
+                st.write(
+                    f"**Run:** #{run_number}"
+                )
+
+                st.write(
+                    f"**Branch:** {branch}"
+                )
+
+                st.write(
+                    f"**Status:** {status.upper()}"
+                )
+
+                st.write(
+                    f"**Conclusion:** "
+                    f"{conclusion or 'Running'}"
+                )
+
+                st.write(
+                    f"**Created:** {created_at}"
+                )
+
+                st.write(
+                    f"**Updated:** {updated_at}"
+                )
+
+
+                # ---------------------------------
+                # RESULT MESSAGE
+                # ---------------------------------
+
+                if conclusion == "success":
+
+                    st.success(
+                        "🟢 GitHub Actions build "
+                        "completed successfully."
+                    )
+
+                elif conclusion == "failure":
+
+                    st.error(
+                        "🔴 GitHub Actions build failed."
+                    )
+
+                elif status in [
+                    "queued",
+                    "in_progress"
+                ]:
+
+                    st.warning(
+                        "🟡 GitHub Actions workflow "
+                        "is currently running."
+                    )
+
+                else:
+
+                    st.info(
+                        "ℹ️ Workflow status is "
+                        "currently unavailable."
+                    )
+
+            else:
+
+                st.info(
+                    "No GitHub Actions workflow runs found."
+                )
+
+        else:
+
+            st.error(
+                "Unable to access GitHub Actions API."
+            )
+
+            st.write(
+                f"GitHub API Status: "
+                f"{response.status_code}"
+            )
+
+    except requests.RequestException as error:
+
+        st.error(
+            "Unable to connect to GitHub."
         )
 
-    with col3:
-
-        st.metric(
-            "Pipeline",
-            "ACTIVE"
+        st.write(
+            str(error)
         )
-
-
-    st.divider()
-
-    st.subheader(
-        "Latest Pipeline"
-    )
-
-    st.success(
-        "Build #001 completed successfully."
-    )
-
-    st.write(
-        "Environment: Production"
-    )
-
-    st.write(
-        "Status: SUCCESS"
-    )
-
 
 # =================================================
 # HEALTH CHECK
