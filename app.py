@@ -1,13 +1,11 @@
 import streamlit as st
 import time
 import requests
-import socket
 
 from database import (
     create_database,
     save_deployment,
-    save_log_analysis,
-    save_system_monitoring
+    save_log_analysis
 )
 
 from auth import login_page
@@ -17,9 +15,9 @@ from ai_engine import analyze_log
 from monitor import get_system_health
 
 
-# =================================================
-# CONFIGURATION
-# =================================================
+# -------------------------------------------------
+# PAGE CONFIGURATION
+# -------------------------------------------------
 
 st.set_page_config(
     page_title="Smart DevOps Automation Platform",
@@ -27,19 +25,17 @@ st.set_page_config(
     layout="wide"
 )
 
-API_BASE_URL = "https://smart-devops-api.onrender.com"
 
-
-# =================================================
+# -------------------------------------------------
 # DATABASE
-# =================================================
+# -------------------------------------------------
 
 create_database()
 
 
-# =================================================
+# -------------------------------------------------
 # SESSION STATE
-# =================================================
+# -------------------------------------------------
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -54,31 +50,9 @@ if "email" not in st.session_state:
     st.session_state.email = ""
 
 
-# =================================================
-# API FUNCTION
-# =================================================
-
-def get_device_data(device_name):
-
-    try:
-
-        response = requests.get(
-            f"{API_BASE_URL}/api/monitor/{device_name}",
-            timeout=5
-        )
-
-        if response.status_code == 200:
-            return response.json()
-
-        return None
-
-    except requests.RequestException:
-        return None
-
-
-# =================================================
-# LOGIN
-# =================================================
+# -------------------------------------------------
+# LOGIN PAGE
+# -------------------------------------------------
 
 if not st.session_state.logged_in:
 
@@ -87,9 +61,9 @@ if not st.session_state.logged_in:
     st.stop()
 
 
-# =================================================
+# -------------------------------------------------
 # SIDEBAR
-# =================================================
+# -------------------------------------------------
 
 st.sidebar.title("🚀 Smart DevOps")
 
@@ -138,73 +112,198 @@ if page == "Dashboard":
     )
 
     st.write(
-        "Real-time monitoring, analysis and automation dashboard."
+        "Real-time monitoring, analysis and "
+        "automation dashboard."
     )
 
     st.divider()
 
+
+    # -------------------------------------------------
+    # LIVE DEVICE MONITORING
+    # -------------------------------------------------
+
     st.subheader("🖥️ Device Monitoring")
 
-    device_name = st.text_input(
-        "Device Name",
-        value=socket.gethostname()
+    DEVICE_NAME = "LAPTOP-SFM5Q1KM"
+
+    MONITOR_API = (
+        "https://smart-devops-api.onrender.com/"
+        f"api/monitor/{DEVICE_NAME}"
     )
 
-    device_data = get_device_data(
-        device_name
-    )
+    try:
 
-    if device_data:
-
-        st.success(
-            f"🟢 {device_name} is connected"
+        response = requests.get(
+            MONITOR_API,
+            timeout=5
         )
 
-        col1, col2, col3, col4 = st.columns(4)
+        if response.status_code == 200:
 
-        with col1:
+            device = response.json()
 
-            st.metric(
-                "CPU Usage",
-                f"{device_data['cpu']}%"
+            col1, col2, col3, col4 = st.columns(4)
+
+            with col1:
+
+                st.metric(
+                    "Device",
+                    device["device_name"]
+                )
+
+            with col2:
+
+                st.metric(
+                    "CPU Usage",
+                    f"{device['cpu']}%"
+                )
+
+            with col3:
+
+                st.metric(
+                    "Memory Usage",
+                    f"{device['memory']}%"
+                )
+
+            with col4:
+
+                st.metric(
+                    "Disk Usage",
+                    f"{device['disk']}%"
+                )
+
+
+            if device["status"] == "HEALTHY":
+
+                st.success(
+                    "🟢 Device is healthy."
+                )
+
+            elif device["status"] == "WARNING":
+
+                st.warning(
+                    "🟡 Device resource usage is high."
+                )
+
+            else:
+
+                st.error(
+                    "🔴 Critical resource usage detected."
+                )
+
+
+            st.caption(
+                f"Last updated: {device['updated_at']}"
             )
 
-        with col2:
+        else:
 
-            st.metric(
-                "Memory Usage",
-                f"{device_data['memory']}%"
+            st.warning(
+                "Device is not connected to the monitoring server."
             )
 
-        with col3:
-
-            st.metric(
-                "Disk Usage",
-                f"{device_data['disk']}%"
+            st.caption(
+                f"API Response: {response.status_code}"
             )
 
-        with col4:
+    except requests.RequestException:
+
+        st.warning(
+            "Monitoring server is currently unavailable."
+        )
+
+
+    st.divider()
+
+
+    # -------------------------------------------------
+    # LOCAL SYSTEM HEALTH
+    # -------------------------------------------------
+
+    st.subheader("🔴 Live System Monitoring")
+
+    health = get_system_health()
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+
+        if health["status"] == "HEALTHY":
 
             st.metric(
-                "System Status",
-                device_data["status"]
+                "Application",
+                "ONLINE",
+                "Healthy"
             )
 
-        st.caption(
-            f"Last updated: {device_data['updated_at']}"
+        elif health["status"] == "WARNING":
+
+            st.metric(
+                "Application",
+                "WARNING",
+                "Check system"
+            )
+
+        else:
+
+            st.metric(
+                "Application",
+                "CRITICAL",
+                "Immediate attention"
+            )
+
+    with col2:
+
+        st.metric(
+            "CPU Usage",
+            f"{health['cpu']}%"
+        )
+
+    with col3:
+
+        st.metric(
+            "Memory Usage",
+            f"{health['memory']}%"
+        )
+
+    with col4:
+
+        st.metric(
+            "Disk Usage",
+            f"{health['disk']}%"
+        )
+
+    st.caption(
+        f"Last checked: {health['checked_at']}"
+    )
+
+
+    # -------------------------------------------------
+    # HEALTH MESSAGE
+    # -------------------------------------------------
+
+    if health["status"] == "HEALTHY":
+
+        st.success(
+            "🟢 System is healthy and operating normally."
+        )
+
+    elif health["status"] == "WARNING":
+
+        st.warning(
+            "🟡 System resource usage is getting high."
         )
 
     else:
 
-        st.warning(
-            "Device is not connected to the monitoring server."
+        st.error(
+            "🔴 Critical resource usage detected."
         )
 
-        st.info(
-            "Start api.py and agent.py to connect this device."
-        )
 
     st.divider()
+
 
     # -------------------------------------------------
     # DEVOPS OVERVIEW
@@ -242,7 +341,9 @@ if page == "Dashboard":
             "0"
         )
 
+
     st.divider()
+
 
     # -------------------------------------------------
     # PLATFORM MODULES
@@ -275,6 +376,7 @@ if page == "Dashboard":
             "Monitor build and deployment status."
         )
 
+
     c4, c5, c6 = st.columns(3)
 
     with c4:
@@ -295,8 +397,9 @@ if page == "Dashboard":
 
         st.success(
             "📜 Deployment History\n\n"
-            "View previous deployment activity."
+            "View your previous deployment activity."
         )
+
 
     # -------------------------------------------------
     # AUTO REFRESH
@@ -351,6 +454,7 @@ elif page == "Log Analyzer":
 
             st.stop()
 
+
         result = analyze_log(content)
 
         total = result["total"]
@@ -367,6 +471,7 @@ elif page == "Log Analyzer":
             result["infos"]
         )
 
+
         save_log_analysis(
             st.session_state.user_id,
             total,
@@ -374,6 +479,7 @@ elif page == "Log Analyzer":
             warnings_count,
             infos_count
         )
+
 
         col1, col2, col3, col4 = st.columns(4)
 
@@ -405,25 +511,24 @@ elif page == "Log Analyzer":
                 infos_count
             )
 
+
         if result["errors"]:
 
-            st.subheader(
-                "Detected Errors"
-            )
+            st.subheader("Detected Errors")
 
             for error in result["errors"]:
 
                 st.error(error)
 
+
         if result["warnings"]:
 
-            st.subheader(
-                "Detected Warnings"
-            )
+            st.subheader("Detected Warnings")
 
             for warning in result["warnings"]:
 
                 st.warning(warning)
+
 
         st.success(
             "Log analysis completed and saved."
@@ -476,11 +581,10 @@ elif page == "CI/CD Monitor":
             "ACTIVE"
         )
 
+
     st.divider()
 
-    st.subheader(
-        "Latest Pipeline"
-    )
+    st.subheader("Latest Pipeline")
 
     st.success(
         "Build #001 completed successfully."
@@ -501,19 +605,9 @@ elif page == "CI/CD Monitor":
 
 elif page == "Health Check":
 
-    st.header(
-        "System Health Check"
-    )
+    st.header("System Health Check")
 
     health = get_system_health()
-
-    save_system_monitoring(
-        st.session_state.user_id,
-        health["cpu"],
-        health["memory"],
-        health["disk"],
-        health["status"]
-    )
 
     col1, col2, col3, col4 = st.columns(4)
 
@@ -545,11 +639,13 @@ elif page == "Health Check":
             health["status"]
         )
 
+
     st.caption(
         f"Last checked: {health['checked_at']}"
     )
 
     st.divider()
+
 
     if health["status"] == "HEALTHY":
 
@@ -569,10 +665,6 @@ elif page == "Health Check":
             "🔴 Critical system resource usage detected."
         )
 
-    time.sleep(5)
-
-    st.rerun()
-
 
 # =================================================
 # RECOVERY
@@ -580,9 +672,7 @@ elif page == "Health Check":
 
 elif page == "Recovery":
 
-    st.header(
-        "Recovery Center"
-    )
+    st.header("Recovery Center")
 
     st.write(
         "Perform controlled recovery actions."
@@ -593,6 +683,7 @@ elif page == "Recovery":
         "No operating-system services are modified."
     )
 
+
     action = st.selectbox(
         "Select Recovery Action",
         [
@@ -601,6 +692,7 @@ elif page == "Recovery":
             "Retry Failed Operation"
         ]
     )
+
 
     if st.button(
         "Execute Recovery",
@@ -613,6 +705,7 @@ elif page == "Recovery":
 
             time.sleep(2)
 
+
         st.success(
             f"{action} completed successfully."
         )
@@ -624,14 +717,13 @@ elif page == "Recovery":
 
 elif page == "Deployment History":
 
-    st.header(
-        "Deployment History"
-    )
+    st.header("Deployment History")
 
     project_name = st.text_input(
         "Project Name",
         value="Smart DevOps"
     )
+
 
     environment = st.selectbox(
         "Environment",
@@ -642,6 +734,7 @@ elif page == "Deployment History":
         ]
     )
 
+
     status = st.selectbox(
         "Deployment Status",
         [
@@ -650,6 +743,7 @@ elif page == "Deployment History":
             "PENDING"
         ]
     )
+
 
     if st.button(
         "Record Deployment",
@@ -667,7 +761,9 @@ elif page == "Deployment History":
             "Deployment recorded successfully."
         )
 
+
     st.divider()
+
 
     show_history(
         st.session_state.user_id
