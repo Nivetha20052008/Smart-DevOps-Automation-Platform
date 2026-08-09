@@ -1,0 +1,41 @@
+name: Smart DevOps CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Check Python Files
+        run: |
+          python -m py_compile app.py
+          python -m py_compile api.py
+          python -m py_compile agent.py
+          python -m py_compile auth.py
+          python -m py_compile database.py
+          python -m py_compile errors.py
+          python -m py_compile history.py
+          python -m py_compile monitor.py
+          python -m py_compile ai_engine.py
+
+      - name: CI Completed
+        run: echo "Smart DevOps CI completed successfully"
