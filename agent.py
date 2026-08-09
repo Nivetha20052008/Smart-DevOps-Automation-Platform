@@ -39,14 +39,16 @@ while True:
             json=data,
             timeout=10
         )
-
         print(
-            f"Device: {DEVICE_NAME} | "
-            f"CPU: {data['cpu']}% | "
-            f"RAM: {data['memory']}% | "
-            f"Disk: {data['disk']}% | "
-            f"Status: {data['status']}"
-        )
+    f"Device: {DEVICE_NAME} | "
+    f"CPU: {data['cpu']}% | "
+    f"RAM: {data['memory']}% | "
+    f"Disk: {data['disk']}% | "
+    f"Status: {data['status']} | "
+    f"API: {response.status_code}"
+)
+
+        
 
     except Exception as error:
 
