@@ -1,3 +1,4 @@
+
 import streamlit as st
 import time
 import requests
@@ -51,13 +52,11 @@ if "email" not in st.session_state:
 
 
 # -------------------------------------------------
-# LOGIN PAGE
+# LOGIN
 # -------------------------------------------------
 
 if not st.session_state.logged_in:
-
     login_page()
-
     st.stop()
 
 
@@ -123,186 +122,8 @@ if page == "Dashboard":
 
     st.divider()
 
-
     # -------------------------------------------------
-    # CONNECT YOUR DEVICE
-    # -------------------------------------------------
-
-    st.subheader("🖥️ Connect Your Device")
-
-    st.write(
-        "To monitor CPU, memory and disk usage "
-        "of your computer, install the Smart DevOps Agent."
-    )
-
-    connect_col1, connect_col2 = st.columns([2, 1])
-
-    with connect_col1:
-
-        st.markdown(
-            """
-            ### 📥 How to connect this computer
-
-            **Step 1:** Download the Smart DevOps Agent.
-
-            **Step 2:** Install the downloaded application.
-
-            **Step 3:** The Agent will run in the background.
-
-            **Step 4:** Wait approximately 30–60 seconds.
-
-            **Step 5:** Refresh this dashboard.
-
-            Your device will automatically appear under
-            **Connected Devices**.
-            """
-        )
-
-    with connect_col2:
-
-        st.markdown("### 🚀 Agent")
-
-        st.link_button(
-            "📥 Download Smart DevOps Agent",
-            "https://github.com/Nivetha20052008/Smart-DevOps-Automation-Platform/releases/download/v1.0.1/SmartDevOpsAgentSetup.exe",
-            use_container_width=True
-        )
-
-        st.caption(
-            "Windows Agent • Version 1.0.0"
-        )
-
-        st.link_button(
-            "📦 View Release",
-            "https://github.com/Nivetha20052008/Smart-DevOps-Automation-Platform/releases/tag/v1.0.1",
-            use_container_width=True
-        )
-
-
-    st.info(
-        "💡 The Agent must be installed on the computer "
-        "you want to monitor. Opening the website alone "
-        "cannot read that computer's CPU, memory or disk usage."
-    )
-
-    st.divider()
-
-
-    # -------------------------------------------------
-    # CONNECTED DEVICE MONITORING
-    # -------------------------------------------------
-
-    st.subheader("🖥️ Connected Devices")
-
-    MONITOR_API = (
-        "https://smart-devops-api.onrender.com/api/monitor"
-    )
-
-    try:
-
-        response = requests.get(
-            MONITOR_API,
-            timeout=10
-        )
-
-        if response.status_code == 200:
-
-            result = response.json()
-
-            devices = result.get(
-                "devices",
-                []
-            )
-
-            if devices:
-
-                for device in devices:
-
-                    st.markdown(
-                        f"### 💻 {device['device_name']}"
-                    )
-
-                    col1, col2, col3, col4 = st.columns(4)
-
-                    with col1:
-
-                        st.metric(
-                            "CPU Usage",
-                            f"{device['cpu']}%"
-                        )
-
-                    with col2:
-
-                        st.metric(
-                            "Memory Usage",
-                            f"{device['memory']}%"
-                        )
-
-                    with col3:
-
-                        st.metric(
-                            "Disk Usage",
-                            f"{device['disk']}%"
-                        )
-
-                    with col4:
-
-                        st.metric(
-                            "Status",
-                            device["status"]
-                        )
-
-
-                    if device["status"] == "HEALTHY":
-
-                        st.success(
-                            "🟢 Device is healthy."
-                        )
-
-                    elif device["status"] == "WARNING":
-
-                        st.warning(
-                            "🟡 Device resource usage is high."
-                        )
-
-                    else:
-
-                        st.error(
-                            "🔴 Critical resource usage detected."
-                        )
-
-
-                    st.caption(
-                        f"Last updated: "
-                        f"{device['updated_at']}"
-                    )
-
-                    st.divider()
-
-            else:
-
-                st.info(
-                    "No devices are currently connected. "
-                    "Install the Smart DevOps Agent above "
-                    "to connect this computer."
-                )
-
-        else:
-
-            st.error(
-                f"Monitoring API error: "
-                f"{response.status_code}"
-            )
-
-    except requests.RequestException:
-
-        st.warning(
-            "Monitoring server is currently unavailable."
-        )
-
-
-    # -------------------------------------------------
-    # LOCAL SYSTEM HEALTH
+    # LIVE SYSTEM MONITORING
     # -------------------------------------------------
 
     st.subheader("🔴 Live System Monitoring")
@@ -337,14 +158,12 @@ if page == "Dashboard":
                 "Immediate attention"
             )
 
-
     with col2:
 
         st.metric(
             "CPU Usage",
             f"{health['cpu']}%"
         )
-
 
     with col3:
 
@@ -353,7 +172,6 @@ if page == "Dashboard":
             f"{health['memory']}%"
         )
 
-
     with col4:
 
         st.metric(
@@ -361,11 +179,9 @@ if page == "Dashboard":
             f"{health['disk']}%"
         )
 
-
     st.caption(
         f"Last checked: {health['checked_at']}"
     )
-
 
     # -------------------------------------------------
     # HEALTH MESSAGE
@@ -389,9 +205,7 @@ if page == "Dashboard":
             "🔴 Critical resource usage detected."
         )
 
-
     st.divider()
-
 
     # -------------------------------------------------
     # DEVOPS OVERVIEW
@@ -429,9 +243,7 @@ if page == "Dashboard":
             "0"
         )
 
-
     st.divider()
-
 
     # -------------------------------------------------
     # PLATFORM MODULES
@@ -464,7 +276,6 @@ if page == "Dashboard":
             "Monitor build and deployment status."
         )
 
-
     c4, c5, c6 = st.columns(3)
 
     with c4:
@@ -487,7 +298,6 @@ if page == "Dashboard":
             "📜 Deployment History\n\n"
             "View your previous deployment activity."
         )
-
 
     # -------------------------------------------------
     # AUTO REFRESH
@@ -516,7 +326,6 @@ elif page == "Log Analyzer":
         height=250
     )
 
-
     if st.button(
         "Analyze Log",
         use_container_width=True
@@ -543,7 +352,6 @@ elif page == "Log Analyzer":
 
             st.stop()
 
-
         result = analyze_log(content)
 
         total = result["total"]
@@ -560,7 +368,6 @@ elif page == "Log Analyzer":
             result["infos"]
         )
 
-
         save_log_analysis(
             st.session_state.user_id,
             total,
@@ -568,7 +375,6 @@ elif page == "Log Analyzer":
             warnings_count,
             infos_count
         )
-
 
         col1, col2, col3, col4 = st.columns(4)
 
@@ -600,7 +406,6 @@ elif page == "Log Analyzer":
                 infos_count
             )
 
-
         if result["errors"]:
 
             st.subheader(
@@ -611,7 +416,6 @@ elif page == "Log Analyzer":
 
                 st.error(error)
 
-
         if result["warnings"]:
 
             st.subheader(
@@ -621,7 +425,6 @@ elif page == "Log Analyzer":
             for warning in result["warnings"]:
 
                 st.warning(warning)
-
 
         st.success(
             "Log analysis completed and saved."
@@ -715,7 +518,6 @@ elif page == "CI/CD Monitor":
                     "unknown"
                 )
 
-
                 # ---------------------------------
                 # BUILD STATUS
                 # ---------------------------------
@@ -740,10 +542,7 @@ elif page == "CI/CD Monitor":
 
                 else:
 
-                    build_status = (
-                        status.upper()
-                    )
-
+                    build_status = status.upper()
 
                 # ---------------------------------
                 # STATUS CARDS
@@ -772,12 +571,10 @@ elif page == "CI/CD Monitor":
                         status.upper()
                     )
 
-
                 st.divider()
 
-
                 # ---------------------------------
-                # LATEST WORKFLOW
+                # LATEST PIPELINE
                 # ---------------------------------
 
                 st.subheader(
@@ -813,9 +610,8 @@ elif page == "CI/CD Monitor":
                     f"**Updated:** {updated_at}"
                 )
 
-
                 # ---------------------------------
-                # RESULT MESSAGE
+                # RESULT
                 # ---------------------------------
 
                 if conclusion == "success":
@@ -918,13 +714,11 @@ elif page == "Health Check":
             health["status"]
         )
 
-
     st.caption(
         f"Last checked: {health['checked_at']}"
     )
 
     st.divider()
-
 
     if health["status"] == "HEALTHY":
 
@@ -964,7 +758,6 @@ elif page == "Recovery":
         "No operating-system services are modified."
     )
 
-
     action = st.selectbox(
         "Select Recovery Action",
         [
@@ -973,7 +766,6 @@ elif page == "Recovery":
             "Retry Failed Operation"
         ]
     )
-
 
     if st.button(
         "Execute Recovery",
@@ -985,7 +777,6 @@ elif page == "Recovery":
         ):
 
             time.sleep(2)
-
 
         st.success(
             f"{action} completed successfully."
@@ -1007,7 +798,6 @@ elif page == "Deployment History":
         value="Smart DevOps"
     )
 
-
     environment = st.selectbox(
         "Environment",
         [
@@ -1017,7 +807,6 @@ elif page == "Deployment History":
         ]
     )
 
-
     status = st.selectbox(
         "Deployment Status",
         [
@@ -1026,7 +815,6 @@ elif page == "Deployment History":
             "PENDING"
         ]
     )
-
 
     if st.button(
         "Record Deployment",
@@ -1044,10 +832,9 @@ elif page == "Deployment History":
             "Deployment recorded successfully."
         )
 
-
     st.divider()
-
 
     show_history(
         st.session_state.user_id
     )
+
