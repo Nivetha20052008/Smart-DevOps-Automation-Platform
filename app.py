@@ -164,7 +164,7 @@ if page == "Dashboard":
 
         st.link_button(
             "📥 Download Smart DevOps Agent",
-            "https://github.com/Nivetha20052008/Smart-DevOps-Automation-Platform/releases/download/v1.0.0/SmartDevOpsAgentSetup.exe",
+            "https://github.com/Nivetha20052008/Smart-DevOps-Automation-Platform/releases/download/v1.0.1/SmartDevOpsAgentSetup.exe",
             use_container_width=True
         )
 
@@ -174,7 +174,7 @@ if page == "Dashboard":
 
         st.link_button(
             "📦 View Release",
-            "https://github.com/Nivetha20052008/Smart-DevOps-Automation-Platform/releases/tag/v1.0.0",
+            "https://github.com/Nivetha20052008/Smart-DevOps-Automation-Platform/releases/tag/v1.0.1",
             use_container_width=True
         )
 
