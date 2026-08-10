@@ -125,6 +125,70 @@ if page == "Dashboard":
 
 
     # -------------------------------------------------
+    # CONNECT YOUR DEVICE
+    # -------------------------------------------------
+
+    st.subheader("🖥️ Connect Your Device")
+
+    st.write(
+        "To monitor CPU, memory and disk usage "
+        "of your computer, install the Smart DevOps Agent."
+    )
+
+    connect_col1, connect_col2 = st.columns([2, 1])
+
+    with connect_col1:
+
+        st.markdown(
+            """
+            ### 📥 How to connect this computer
+
+            **Step 1:** Download the Smart DevOps Agent.
+
+            **Step 2:** Install the downloaded application.
+
+            **Step 3:** The Agent will run in the background.
+
+            **Step 4:** Wait approximately 30–60 seconds.
+
+            **Step 5:** Refresh this dashboard.
+
+            Your device will automatically appear under
+            **Connected Devices**.
+            """
+        )
+
+    with connect_col2:
+
+        st.markdown("### 🚀 Agent")
+
+        st.link_button(
+            "📥 Download Smart DevOps Agent",
+            "https://github.com/Nivetha20052008/Smart-DevOps-Automation-Platform/releases/download/v1.0.0/SmartDevOpsAgentSetup.exe",
+            use_container_width=True
+        )
+
+        st.caption(
+            "Windows Agent • Version 1.0.0"
+        )
+
+        st.link_button(
+            "📦 View Release",
+            "https://github.com/Nivetha20052008/Smart-DevOps-Automation-Platform/releases/tag/v1.0.0",
+            use_container_width=True
+        )
+
+
+    st.info(
+        "💡 The Agent must be installed on the computer "
+        "you want to monitor. Opening the website alone "
+        "cannot read that computer's CPU, memory or disk usage."
+    )
+
+    st.divider()
+
+
+    # -------------------------------------------------
     # CONNECTED DEVICE MONITORING
     # -------------------------------------------------
 
@@ -218,7 +282,9 @@ if page == "Dashboard":
             else:
 
                 st.info(
-                    "No devices are currently connected."
+                    "No devices are currently connected. "
+                    "Install the Smart DevOps Agent above "
+                    "to connect this computer."
                 )
 
         else:
@@ -808,6 +874,7 @@ elif page == "CI/CD Monitor":
         st.write(
             str(error)
         )
+
 
 # =================================================
 # HEALTH CHECK
